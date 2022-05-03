@@ -1,0 +1,64 @@
+
+global cudakernel1() //call for processor 1
+
+global cudakernel2() //call for processor 2
+
+
+main()
+{
+	init mpi
+
+	start P proc
+
+	//process 0 is "manager"
+
+	//for base case, preallocate some host memory for process 1, 2, etc.
+
+	cudamalloc some pool of memory
+	//option 1: statically allocate that memory to different process (i.e. I know tasks in process 2 will never take more than 5MB or whatever, overestimate this)
+	//option 2: dynamically track memory
+
+	//for simplicity pre-allocate P cuda streams
+
+	if (process == 0)
+	{
+		//do the actual scheduling
+
+		while()
+		{
+			if (receive from processor 1)
+			{
+				do processor 1's task (for example vector multiplication of size 100)
+				with memory allocated/given to P1, add cudakernel1 to stream1
+				also add memory transfers to the same stream
+			}
+			if (receive from processor 2)
+			{
+				do processor 2's task (for example vector multiplication of size 1000)
+				with memory allocated/given to P2, add cudakernel2 to stream2
+				also add memory transfers to the same stream
+			}
+		}
+
+		//After basic case works, we can play with how we allocate these streams (biggest first?)
+		//Probably we'd have to add task to some queue or data structure and then pop them off to schedule them
+	}
+	else ... 
+	{
+		//idea here is that each process will spawn off some different type of task
+		//let's say process 1 is doing vector multiplication of size 100
+		for (however many tasks I want this process to send)
+			send message/request to process 0
+	}
+	//for example
+	else if (process == 2)
+	{
+		for (10 times)
+			send message to process 0 from processor 2 //this will be down through message passing
+	}
+	else if (process == 3)
+	{
+		for (100 times)
+			send message to process 0 from process 3
+	}
+}

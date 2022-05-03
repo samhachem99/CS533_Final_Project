@@ -1,6 +1,7 @@
 //Simple Linked List Structure For Tracking Pre-Allocated Data
 
 #include "pre_alloc_mem.h"
+#include <stdio.h>
 
 typedef struct Node {
 	char *ptr;
@@ -10,6 +11,7 @@ typedef struct Node {
 } Node;
 
 Node *head = NULL;
+int num_nodes = 0;
 
 void free_all_recurse(Node *n)
 {
@@ -22,6 +24,9 @@ void free_all_recurse(Node *n)
 
 int init_pre_alloc_mem(char *ptr, int num_bytes)
 {
+	if (num_bytes <= 0)
+		return 1; //fail
+
 	if (head != NULL)
 		free_all_pre_alloc_mem();
 
@@ -30,6 +35,7 @@ int init_pre_alloc_mem(char *ptr, int num_bytes)
 	head->free = true;
 	head->size = num_bytes;
 	head->next = NULL;
+	num_nodes = 1;
 
 	return 0; //success
 }
@@ -37,6 +43,9 @@ int init_pre_alloc_mem(char *ptr, int num_bytes)
 int get_pre_alloc_mem(int num_bytes, char **ptr)
 {
 	*ptr = NULL;
+
+	if (num_bytes <= 0)
+		return 1; //fail
 
 	if (NULL == head)
 		return 1; //fail
@@ -65,17 +74,19 @@ int get_pre_alloc_mem(int num_bytes, char **ptr)
 		new_node->free = true;
 		new_node->size = best->size - num_bytes;
 		new_node->next = best->next;
+		num_nodes++;
 		
 		best->free = false;
 		best->size = num_bytes;
 		best->next = new_node;
+
 	}
 
 	*ptr = best;
 	return 0; //success
 }
 
-int free_pre_alloc_mem(char *ptr)
+int free_pre_alloc_mem(char *ptr) //must pass in the ptr to the beginning of the region
 {
 	if (NULL == head)
 		return 1; //fail
@@ -85,7 +96,7 @@ int free_pre_alloc_mem(char *ptr)
 	Node *prev = NULL;
 	while (curr != NULL)
 	{
-		if (curr == ptr)
+		if (curr->ptr == ptr)
 			break;
 
 		prev = curr;
@@ -102,6 +113,7 @@ int free_pre_alloc_mem(char *ptr)
 		prev->next = curr->next->next;
 		free(curr);
 		free(curr->next);
+		num_nodes -= 2;
 		return 0; //success
 	}
 
@@ -111,6 +123,7 @@ int free_pre_alloc_mem(char *ptr)
 		prev->size += curr->size;
 		prev->next = curr->next;
 		free(curr);
+		num_nodes--;
 		return 0; //success
 	}
 
@@ -124,6 +137,7 @@ int free_pre_alloc_mem(char *ptr)
 		else
 			head = curr->next;
 		free(curr);
+		num_nodes--;
 		return 0; //success
 	}
 
@@ -136,5 +150,65 @@ int free_all_pre_alloc_mem()
 {
 	free_all_recurse(head);
 	head = NULL;
+	num_nodes = 0;
 	return 0; //success
+}
+
+//Test Functions
+int test_pre_alloc_internal_check()
+{
+	int num_err = 0, num_nodes_test = 0;
+
+	Node *curr = head, *prev = NULL;
+	while (curr != NULL)
+	{
+		num_nodes_test++;
+
+		if (prev && prev->free && curr->free)
+		{
+			printf("ERROR: CONSECUTIVE FREE NODES PRESENT\n");
+			num_err++;
+		}
+
+		prev = curr;
+		curr = curr->next;
+	}
+
+	if (num_nodes != num_nodes_test)
+	{
+		printf("ERROR: STRUCTURE EXPECTED %d NODES BUT LIST ONLY HAS %d\n", num_nodes, num_nodes_test);
+		num_err++;
+	}
+
+	return num_err;
+}
+
+int test_pre_alloc_get_free()
+{
+	int free_size = 0;
+	Node *curr = head;
+	while (curr != NULL)
+	{
+		if (curr->free)
+			free_size += curr->size;
+
+		curr = curr->next;
+	}
+
+	return free_size;
+}
+
+int test_pre_alloc_get_used()
+{
+	int used_size = 0;
+	Node *curr = head;
+	while (curr != NULL)
+	{
+		if (!curr->free)
+			used_size += curr->size;
+
+		curr = curr->next;
+	}
+
+	return used_size;
 }
