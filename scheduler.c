@@ -19,13 +19,18 @@ int main(int argc, char** argv) {
 
     if(my_id == 0) {
         // things that should run only once.
+        task_t my_tasks[num_procs-1];
         int mem_size = TOTAL_MEM_ALLOC_SIZE_MB << 20;
         void *mem_ptr;
         cudaError_t e1 = cudaMallocHost(&mem_ptr, mem_size);
 
-        task_t my_tasks[num_procs-1];
+        while(true) {
+            
+        }
         
         printf("this is process %d, the scheduling process\n", my_id);
+
+        e1 = cudaFreeHost(mem_ptr);
     } else {
         printf("this is process %d, and we are handling task %d\n", my_id, my_id);
     }
