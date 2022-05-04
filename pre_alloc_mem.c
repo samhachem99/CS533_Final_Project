@@ -2,12 +2,13 @@
 
 #include "pre_alloc_mem.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef struct Node {
 	char *ptr;
-	bool free;
-	int size;
-	Node next;
+	char free;
+	long size;
+	struct Node *next;
 } Node;
 
 Node *head = NULL;
@@ -22,7 +23,7 @@ void free_all_recurse(Node *n)
 	free(n); //It's not our responsibility to free n->ptr
 }
 
-int init_pre_alloc_mem(char *ptr, int num_bytes)
+int init_pre_alloc_mem(char *ptr, long num_bytes)
 {
 	if (num_bytes <= 0)
 		return 1; //fail
@@ -32,7 +33,7 @@ int init_pre_alloc_mem(char *ptr, int num_bytes)
 
 	head = malloc(sizeof(Node));
 	head->ptr = ptr;
-	head->free = true;
+	head->free = 1;
 	head->size = num_bytes;
 	head->next = NULL;
 	num_nodes = 1;
@@ -40,7 +41,7 @@ int init_pre_alloc_mem(char *ptr, int num_bytes)
 	return 0; //success
 }
 
-int get_pre_alloc_mem(int num_bytes, char **ptr)
+int get_pre_alloc_mem(long num_bytes, char **ptr)
 {
 	*ptr = NULL;
 
@@ -55,7 +56,7 @@ int get_pre_alloc_mem(int num_bytes, char **ptr)
 	Node *curr = head;
 	while (curr != NULL)
 	{
-		if (true == curr->free && curr->size >= num_bytes &&
+		if (1 == curr->free && curr->size >= num_bytes &&
 			(NULL == best || curr->size < best->size))
 			best = curr;
 
@@ -66,23 +67,23 @@ int get_pre_alloc_mem(int num_bytes, char **ptr)
 		return 1; //fail
 
 	if (best->size == num_bytes)
-		best->free = false;
+		best->free = 0;
 	else
 	{
 		Node *new_node = malloc(sizeof(Node));
 		new_node->ptr = best->ptr + num_bytes;
-		new_node->free = true;
+		new_node->free = 1;
 		new_node->size = best->size - num_bytes;
 		new_node->next = best->next;
 		num_nodes++;
 		
-		best->free = false;
+		best->free = 0;
 		best->size = num_bytes;
 		best->next = new_node;
 
 	}
 
-	*ptr = best;
+	*ptr = best->ptr;
 	return 0; //success
 }
 
@@ -142,7 +143,7 @@ int free_pre_alloc_mem(char *ptr) //must pass in the ptr to the beginning of the
 	}
 
 	//Case 4: Just mark curr free
-	curr->free = true;
+	curr->free = 1;
 	return 0; //success
 }
 
@@ -183,9 +184,9 @@ int test_pre_alloc_internal_check()
 	return num_err;
 }
 
-int test_pre_alloc_get_free()
+long test_pre_alloc_get_free()
 {
-	int free_size = 0;
+	long free_size = 0;
 	Node *curr = head;
 	while (curr != NULL)
 	{
@@ -198,9 +199,9 @@ int test_pre_alloc_get_free()
 	return free_size;
 }
 
-int test_pre_alloc_get_used()
+long test_pre_alloc_get_used()
 {
-	int used_size = 0;
+	long used_size = 0;
 	Node *curr = head;
 	while (curr != NULL)
 	{
@@ -211,4 +212,24 @@ int test_pre_alloc_get_used()
 	}
 
 	return used_size;
+}
+
+int test_print_LL()
+{
+	Node *curr = head;
+	int idx = 0;
+	printf("----------LL----------\n");
+	while (curr != NULL)
+	{
+		if (curr->free)
+			printf("NODE %3d: SIZE%8ld, FREE --> %#x\n", idx, curr->size, (unsigned int) curr->ptr);
+		else
+			printf("NODE %3d: SIZE%8ld, USED --> %#x\n", idx, curr->size, (unsigned int) curr->ptr);
+
+		curr = curr->next;
+		idx++;
+	}
+
+	printf("--------END LL--------\n");
+	return 0;
 }
