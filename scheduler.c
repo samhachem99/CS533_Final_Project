@@ -32,6 +32,11 @@ int main(int argc, char** argv) {
 
         e1 = cudaFreeHost(mem_ptr);
     } else {
+        for(int i = 0; i < (num_procs-1); i++) {
+            char message[1024] = "something to send";
+            int err = MPI_Send(&message, 1, MPI_CHAR, );
+        }
+
         printf("this is process %d, and we are handling task %d\n", my_id, my_id);
     }
 
