@@ -27,12 +27,12 @@ __global__ void vector_add_kernel(const float *x, const float *y, float *z, int 
 
 int main()
 {
-	(float*) h_a[NUM_PROCS][NUM_KERNELS_PER_PROC];
-	(float*) h_b[NUM_PROCS][NUM_KERNELS_PER_PROC];
-	(float*) h_c[NUM_PROCS][NUM_KERNELS_PER_PROC];
-	(float*) d_a[NUM_PROCS][NUM_KERNELS_PER_PROC];
-	(float*) d_b[NUM_PROCS][NUM_KERNELS_PER_PROC];
-	(float*) d_c[NUM_PROCS][NUM_KERNELS_PER_PROC];
+	float* h_a[NUM_PROCS][NUM_KERNELS_PER_PROC];
+	float* h_b[NUM_PROCS][NUM_KERNELS_PER_PROC];
+	float* h_c[NUM_PROCS][NUM_KERNELS_PER_PROC];
+	float* d_a[NUM_PROCS][NUM_KERNELS_PER_PROC];
+	float* d_b[NUM_PROCS][NUM_KERNELS_PER_PROC];
+	float* d_c[NUM_PROCS][NUM_KERNELS_PER_PROC];
 
 	int size = 0;
 	for (int my_id = 1; my_id < NUM_PROCS; my_id++)
