@@ -87,5 +87,6 @@ int main()
 		}
 	}
 
+	printf("FINISHED\n");
 	return 0;
 }
