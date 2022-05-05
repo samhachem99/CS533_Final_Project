@@ -44,9 +44,9 @@ int main()
     		dim3 blockDim(BLOCK_SIZE);
 			
 			//Allocate host
-			h_a[my_id][task] = malloc(size * sizeof(float));
-			h_b[my_id][task] = malloc(size * sizeof(float));
-			h_c[my_id][task] = malloc(size * sizeof(float));
+			h_a[my_id][task] = (float*) malloc(size * sizeof(float));
+			h_b[my_id][task] = (float*) malloc(size * sizeof(float));
+			h_c[my_id][task] = (float*) malloc(size * sizeof(float));
 
 			//Init Host
 			for (int i = 0; i < size; i++)
