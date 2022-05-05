@@ -42,6 +42,10 @@ int main()
 			size = (my_id+1) << 20;
 			dim3 gridDim(1+(1.0*size/BLOCK_SIZE));
     		dim3 blockDim(BLOCK_SIZE);
+
+    		//Create Stream
+			cudaStream_t stream;
+			cudaStreamCreate(&stream);
 			
 			//Allocate host
 			h_a[my_id][task] = (float*) malloc(size * sizeof(float));
@@ -59,10 +63,6 @@ int main()
 		    cudaMallocAsync((float **)&d_a[my_id][task], size * sizeof(float), stream);
 		    cudaMallocAsync((float **)&d_b[my_id][task], size * sizeof(float), stream);
 		    cudaMallocAsync((float **)&d_c[my_id][task], size * sizeof(float), stream);
-
-			//Create Stream
-			cudaStream_t stream;
-			cudaStreamCreate(&stream);
 
 			//Do Work
 		    cudaMemcpyAsync(d_a[my_id][task], h_a[my_id][task], size * sizeof(float), cudaMemcpyHostToDevice, stream);
